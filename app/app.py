@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, abort
 from data.bakery_db import categories, products
 
 app = Flask(__name__)
@@ -42,7 +42,7 @@ def get_category_by_id(category_id):
     try:
         return categories[category_id], 200
     except KeyError:
-        return 404
+        abort(400, message="Category not found")
 
 
 # Product
@@ -71,9 +71,17 @@ def get_products():
 def create_category():
     request_data = request.get_json()
 
-    new_category = {
-        "category_id": (max(categories.keys()) + 1),
-        "category_name": request_data["category_name"],
-    }
-    categories.append(new_category)
-    return new_category, 201
+    if "category_name" not in request_data:
+        abort(400, message="Bad request. Please include 'category_name' field.")
+
+    for category in categories.values():
+        if request_data["category_name"] == category["category_name"]:
+            abort(400, message="Category already exists.")
+
+    category_id = max(categories.keys()) + 1
+
+    newer_category = {**request_data, "category_id": category_id}
+
+    categories[category_id] = newer_category
+
+    return newer_category
