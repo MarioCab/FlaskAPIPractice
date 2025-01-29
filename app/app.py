@@ -69,15 +69,11 @@ def get_products():
 
 @app.post("/category")
 def create_category():
-    try:
-        request_data = request.get_json()
+    request_data = request.get_json()
 
-        new_category = {
-            "category_id": (max(categories.keys()) + 1),
-            "category_name": request_data["category_name"],
-        }
-        categories.append(new_category)
-        return new_category, 201
-
-    except KeyError:
-        return 400
+    new_category = {
+        "category_id": (max(categories.keys()) + 1),
+        "category_name": request_data["category_name"],
+    }
+    categories.append(new_category)
+    return new_category, 201
