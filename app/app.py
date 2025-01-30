@@ -24,7 +24,7 @@ def get_categories():
     return {"categories": categories}, 200
 
 
-@app.get("/category/{category_id}")
+@app.get("/category/<int:category_id>")
 def get_category_by_id(category_id):
     """
     Retrieves a specific category by its ID.
@@ -95,3 +95,34 @@ def create_category():
     categories[category_id] = newer_category
 
     return newer_category
+
+
+## DELETE requests
+
+# Category
+
+
+@app.delete("/category/<int:category_id>")
+def delete_category(category_id):
+    """
+    Deletes a category from the bakery.
+
+    Params:
+        category_id (integer): category identifier
+
+    Response Codes:
+        200: Successful Request.
+        400: the category is not deleted because there are products associated with the given category
+        404: the given category identifier does not exist
+    """
+    for product in products.values():
+        if category_id == product["category_id"]:
+            return {
+                "message": "Category cannot be deleted due to having products associated with it"
+            }, 400
+
+    try:
+        del categories[category_id]
+        return {"message": "Category deleted"}, 200
+    except KeyError:
+        return {"message": "Category not found"}, 404
